@@ -77,7 +77,7 @@ void Render() {
         spectating = (loginViewing != loginLocal);
     } else {
         loginViewing = "none";
-        spectating = false;
+        spectating = Api.IsSpectatorClient;
     }
 
     // if (spectating) {
