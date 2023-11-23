@@ -21,8 +21,10 @@ bool S_Window = true;
 bool S_OnlyWhenSpec = true;
 
 #if SIG_DEVELOPER
+
 [Setting category="General" name="Show dev window"]
 bool S_Dev = false;
+
 #endif
 
 [Setting category="General" name="Default camera"]
