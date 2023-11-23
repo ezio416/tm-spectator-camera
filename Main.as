@@ -158,7 +158,7 @@ void Render() {
                     playerIndex = i;
                     break;
                 }
-                if (login = loginLocal)
+                if (login == loginLocal)
                     playerIndex = -1;
             }
             string login;
