@@ -117,7 +117,7 @@ void Render() {
             if (loginLastViewed == "none") {
                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
                 string login = Player.User.Login;
-                if (login == loginLocal)  // check if first player is ourself
+                if (login == loginLocal)
                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
                 Api.SetSpectateTarget(login);
             }
@@ -132,7 +132,7 @@ void Render() {
             if (loginLastViewed == "none") {
                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
                 string login = Player.User.Login;
-                if (login == loginLocal)  // check if first player is ourself
+                if (login == loginLocal)
                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
                 Api.SetSpectateTarget(login);
             } else {
