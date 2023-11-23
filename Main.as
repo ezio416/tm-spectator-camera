@@ -5,6 +5,12 @@ m 2023-11-22
 
 Camera camChoice = S_DefaultCam;
 Camera camCurrent = Camera::None;
+string title = "\\$0D0" + Icons::VideoCamera + " \\$GSpectator Camera";
+
+void RenderMenu() {
+    if (UI::MenuItem(title, "", S_Enabled))
+        S_Enabled = !S_Enabled;
+}
 
 void Render() {
     if (!S_Enabled)
@@ -65,7 +71,7 @@ void Render() {
     } else
         camCurrent = Camera::None;
 
-    UI::Begin("Spectator Camera", UI::WindowFlags::AlwaysAutoResize);
+    UI::Begin(title, UI::WindowFlags::AlwaysAutoResize);
         UI::Text("Current Camera: " + tostring(camCurrent));
     UI::End();
 }
