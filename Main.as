@@ -80,6 +80,9 @@ void Render() {
         spectating = Api.IsSpectatorClient;
     }
 
+    if (S_OnlyWhenSpec && !spectating && !cotd)
+        return;
+
     // if (spectating) {
         CGamePlaygroundClientScriptAPI::ESpectatorCameraType camType = Api.GetSpectatorCameraType();
         CGamePlaygroundClientScriptAPI::ESpectatorTargetType targetType = Api.GetSpectatorTargetType();
@@ -103,6 +106,11 @@ void Render() {
     UI::Begin(title, S_Window, UI::WindowFlags::AlwaysAutoResize);
         UI::Text("Spectating: " + (spectating ? "\\$0F0true" : (cotd ? "\\$FF0maybe" : "\\$F00false")));
         // UI::Text("Current Camera: " + tostring(camCurrent));
+
+        if (UI::Button("Toggle Spectating " + (Api.IsSpectatorClient ? Icons::ToggleOn : Icons::ToggleOff)))
+            Api.RequestSpectatorClient(!Api.IsSpectatorClient);
+
+        UI::Separator();
 
         UI::BeginDisabled(camCurrent == Camera::ReplaySingle || (!spectating && !cotd));
         if (UI::Button("Replay " + Icons::VideoCamera)) {
@@ -148,12 +156,18 @@ void Render() {
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free);
         UI::EndDisabled();
 
-        if (camCurrent == Camera::FollowSingle || camCurrent == Camera::ReplaySingle) {
+
+        if ((spectating || cotd) && (camCurrent == Camera::FollowSingle || camCurrent == Camera::ReplaySingle)) {
+            UI::Separator();
+
+            string login;
+
             if (ViewingPlayer !is null)
                 UI::Text("Watching: " + ViewingPlayer.User.Name);
+
             playerIndex = -1;
             for (uint i = 0; i < Playground.Players.Length; i++) {
-                string login = Playground.Players[i].User.Login;
+                login = Playground.Players[i].User.Login;
                 if (login == loginViewing) {
                     playerIndex = i;
                     break;
@@ -161,7 +175,7 @@ void Render() {
                 if (login == loginLocal)
                     playerIndex = -1;
             }
-            string login;
+
             UI::BeginDisabled(playerIndex == -1);
             if (UI::Button(Icons::ChevronLeft + " Previous")) {
                 login = Playground.Players[(uint(playerIndex) == 0 ? Playground.Players.Length : playerIndex) - 1].User.Login;

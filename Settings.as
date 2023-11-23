@@ -17,6 +17,9 @@ bool S_Enabled = true;
 [Setting category="General" name="Show window"]
 bool S_Window = true;
 
+[Setting category="General" name="Only show when spectating"]
+bool S_OnlyWhenSpec = true;
+
 #if SIG_DEVELOPER
 [Setting category="General" name="Show dev window"]
 bool S_Dev = false;
