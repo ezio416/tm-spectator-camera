@@ -25,7 +25,9 @@ void Render() {
     if (!S_Enabled)
         return;
 
+#if SIG_DEVELOPER
     RenderDev();
+#endif
 
     if (!S_Window)
         return;
