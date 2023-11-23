@@ -58,7 +58,7 @@ void RenderDev() {
         spectating = false;
     }
 
-    UI::Begin("SpecCamDev", UI::WindowFlags::AlwaysAutoResize);
+    UI::Begin("SpecCamDev", S_Dev, UI::WindowFlags::AlwaysAutoResize);
         UI::Text("spec: " + Api.IsSpectator);
         UI::Text("specClient: " + Api.IsSpectatorClient);
         // UI::Text("ForceSpectator: " + Client.ForceSpectator);

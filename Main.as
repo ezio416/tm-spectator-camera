@@ -100,7 +100,7 @@ void Render() {
     // } else
         camCurrent = Camera::None;
 
-    UI::Begin(title, UI::WindowFlags::AlwaysAutoResize);
+    UI::Begin(title, S_Window, UI::WindowFlags::AlwaysAutoResize);
         UI::Text("Spectating: " + (spectating ? "\\$0F0true" : (cotd ? "\\$FF0maybe" : "\\$F00false")));
         // UI::Text("Current Camera: " + tostring(camCurrent));
 
