@@ -1,6 +1,6 @@
 /*
 c 2023-11-22
-m 2023-11-22
+m 2023-11-23
 */
 
 enum Camera {
@@ -17,8 +17,10 @@ bool S_Enabled = true;
 [Setting category="General" name="Show window"]
 bool S_Window = true;
 
+#if SIG_DEVELOPER
 [Setting category="General" name="Show dev window"]
 bool S_Dev = false;
+#endif
 
 [Setting category="General" name="Default camera"]
 Camera S_DefaultCam = Camera::FollowSingle;
