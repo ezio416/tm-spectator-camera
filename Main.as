@@ -37,6 +37,9 @@ void Render() {
 
     CTrackMania@ App = cast<CTrackMania@>(GetApp());
 
+    if (App.Editor !is null)
+        return;
+
     CSmArenaClient@ Playground = cast<CSmArenaClient@>(App.CurrentPlayground);
     if (Playground is null) {
         loginLastViewed = "none";
