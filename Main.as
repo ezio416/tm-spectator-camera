@@ -12,7 +12,7 @@ string loginLocal = GetLocalLogin();
 string loginViewing;
 int playerIndex;
 bool spectating = false;
-string title = "\\$0D0" + Icons::VideoCamera + " \\$GSpectator Camera";
+string title = "\\$0D0" + Icons::VideoCamera + " \\$GSpec Cam";
 CSmPlayer@ ViewingPlayer;
 
 void Main() {
