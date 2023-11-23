@@ -1,6 +1,6 @@
 /*
 c 2023-11-22
-m 2023-11-22
+m 2023-11-23
 */
 
 void RenderDev() {
@@ -10,8 +10,19 @@ void RenderDev() {
     CTrackMania@ App = cast<CTrackMania@>(GetApp());
 
     CSmArenaClient@ Playground = cast<CSmArenaClient@>(App.CurrentPlayground);
-    if (Playground is null)
+    if (Playground is null) {
+        loginLastViewed = "none";
         return;
+    }
+
+    // CSmArena@ Arena = cast<CSmArena@>(Playground.Arena);
+    // if (Arena is null)
+    //     return;
+
+    // if (Arena.Players.Length == 0)
+    //     return;
+
+    // CSmScriptPlayer@ Script = cast<CSmScriptPlayer@>(Arena.Players[0].ScriptAPI);
 
     CGamePlaygroundInterface@ Interface = cast<CGamePlaygroundInterface@>(Playground.Interface);
     if (Interface is null)
@@ -37,19 +48,34 @@ void RenderDev() {
     if (Client is null)
         return;
 
+    @ViewingPlayer = VehicleState::GetViewingPlayer();
+    if (ViewingPlayer !is null) {
+        loginViewing = ViewingPlayer.ScriptAPI.Login;
+        loginLastViewed = loginViewing;
+        spectating = (loginViewing != loginLocal);
+    } else {
+        loginViewing = "none";
+        spectating = false;
+    }
+
     UI::Begin("SpecCamDev", UI::WindowFlags::AlwaysAutoResize);
         UI::Text("spec: " + Api.IsSpectator);
         UI::Text("specClient: " + Api.IsSpectatorClient);
-        UI::Text("ForceSpectator: " + Client.ForceSpectator);
-        UI::Text("ForceCamType: " + Client.SpectatorForceCameraType);
+        // UI::Text("ForceSpectator: " + Client.ForceSpectator);
+        // UI::Text("ForceCamType: " + Client.SpectatorForceCameraType);
         UI::Text("camType: " + tostring(Api.GetSpectatorCameraType()));
         UI::Text("targetType: " + tostring(Api.GetSpectatorTargetType()));
+        // UI::Text("script: " + (Script is null ? "false" : "true"));
+        UI::Text("spec: " + (spectating ? "true" : "false"));
+        UI::Text("login: " + loginLocal);
+        UI::Text("viewing: " + loginViewing);
+        UI::Text("lastViewed: " + loginLastViewed);
 
         if (UI::Button("toggle spec"))
             Api.RequestSpectatorClient(!Api.IsSpectatorClient);
 
-        if (UI::Button("toggle force spec"))
-            Client.ForceSpectator = !Client.ForceSpectator;
+        // if (UI::Button("toggle force spec"))
+        //     Client.ForceSpectator = !Client.ForceSpectator;
 
         if (UI::Button("set replay"))
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay);
@@ -71,7 +97,7 @@ void RenderDev() {
         }
 
         for (uint i = 0; i < Playground.Players.Length; i++) {
-            auto Player = cast<CGamePlayer@>(Playground.Players[i]);
+            CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[i]);
             if (UI::Selectable(Player.User.Name + " " + Player.User.Login, false)) {
                 Api.SetSpectateTarget(Player.User.Login);
                 Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);

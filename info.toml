@@ -4,3 +4,6 @@ author = "Ezio"
 category = "Camera"
 version = "0.1.0"
 siteid = 460
+
+[script]
+dependencies = [ "VehicleState" ]
