@@ -3,16 +3,16 @@ c 2023-09-06
 m 2023-11-23
 */
 
-Camera camChoice = S_DefaultCam;
-Camera camCurrent = Camera::None;
-bool cotd = false;
-string gamemode = "none";
-string loginLastViewed;
-string loginLocal = GetLocalLogin();
-string loginViewing;
-int playerIndex;
-bool spectating = false;
-string title = "\\$0D0" + Icons::VideoCamera + " \\$GSpec Cam";
+Camera     camCurrent      = Camera::None;
+bool       cotd            = false;
+string     gamemode        = "none";
+// bool       inGameAlready   = false;
+string     loginLastViewed;
+string     loginLocal      = GetLocalLogin();
+string     loginViewing;
+int        playerIndex;
+bool       spectating      = false;
+string     title           = "\\$0D0" + Icons::VideoCamera + " \\$GSpec Cam";
 CSmPlayer@ ViewingPlayer;
 
 void Main() {
@@ -42,6 +42,7 @@ void Render() {
 
     CSmArenaClient@ Playground = cast<CSmArenaClient@>(App.CurrentPlayground);
     if (Playground is null) {
+        // inGameAlready = false;
         loginLastViewed = "none";
         return;
     }
@@ -70,6 +71,38 @@ void Render() {
     if (Client is null)
         return;
 
+    // if (!inGameAlready) {
+    //     switch (S_RememberLast ? camLast : S_DefaultCam) {
+    //         case Camera::FollowAll:
+    //             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);
+    //             Client.Spectator_SetForcedTarget_AllPlayers();
+    //             break;
+    //         case Camera::FollowSingle:
+    //             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);
+    //             if (loginLastViewed == "none") {
+    //                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
+    //                 if (Player.User.Login == loginLocal)
+    //                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
+    //                 Api.SetSpectateTarget(Player.User.Login);
+    //             }
+    //             Client.Spectator_SetForcedTarget_Clear();
+    //             break;
+    //         case Camera::ReplaySingle:
+    //             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay);
+    //             if (loginLastViewed == "none") {
+    //                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
+    //                 if (Player.User.Login == loginLocal)
+    //                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
+    //                 Api.SetSpectateTarget(Player.User.Login);
+    //             }
+    //             Client.Spectator_SetForcedTarget_Clear();
+    //             break;
+    //         case Camera::Free:
+    //             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free);
+    //     }
+    //     inGameAlready = true;
+    // }
+
     gamemode = cast<CTrackManiaNetworkServerInfo@>(Network.ServerInfo).CurGameModeStr;
     cotd = gamemode.StartsWith("TM_Knockout");
 
@@ -86,25 +119,26 @@ void Render() {
     if (S_OnlyWhenSpec && !spectating && !cotd)
         return;
 
-    // if (spectating) {
-        CGamePlaygroundClientScriptAPI::ESpectatorCameraType camType = Api.GetSpectatorCameraType();
-        CGamePlaygroundClientScriptAPI::ESpectatorTargetType targetType = Api.GetSpectatorTargetType();
+    CGamePlaygroundClientScriptAPI::ESpectatorCameraType camType = Api.GetSpectatorCameraType();
+    CGamePlaygroundClientScriptAPI::ESpectatorTargetType targetType = Api.GetSpectatorTargetType();
 
-        if (camType == CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free)
-            camCurrent = Camera::Free;
-        else if (camType == CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow) {
-            if (targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single)
-                camCurrent = Camera::FollowSingle;
-            else
-                camCurrent = Camera::FollowAll;
-        } else if (camType == CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay) {
-            if (targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single)
-                camCurrent = Camera::ReplaySingle;
-            else
-                camCurrent = Camera::FollowAll;
-        } else if (camType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::None)
-    // } else
+    if (camType == CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free)
+        camCurrent = Camera::Free;
+    else if (camType == CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow) {
+        if (targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single)
+            camCurrent = Camera::FollowSingle;
+        else
+            camCurrent = Camera::FollowAll;
+    } else if (camType == CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay) {
+        if (targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single)
+            camCurrent = Camera::ReplaySingle;
+        else
+            camCurrent = Camera::FollowAll;
+    } else if (camType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::None)
         camCurrent = Camera::None;
+
+    // if (camCurrent != Camera::None)
+    //     camLast = camCurrent;
 
     UI::Begin(title, S_Window, UI::WindowFlags::AlwaysAutoResize);
         UI::Text("Spectating: " + (spectating ? "\\$0F0true" : (cotd ? "\\$FF0maybe" : "\\$F00false")));
@@ -119,10 +153,9 @@ void Render() {
         if (UI::Button("Replay " + Icons::VideoCamera)) {
             if (loginLastViewed == "none") {
                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
-                string login = Player.User.Login;
-                if (login == loginLocal)
+                if (Player.User.Login == loginLocal)
                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
-                Api.SetSpectateTarget(login);
+                Api.SetSpectateTarget(Player.User.Login);
             }
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay);
             Client.Spectator_SetForcedTarget_Clear();
@@ -134,13 +167,12 @@ void Render() {
         if (UI::Button("Follow " + Icons::Eye)) {
             if (loginLastViewed == "none") {
                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
-                string login = Player.User.Login;
-                if (login == loginLocal)
+                if (Player.User.Login == loginLocal)
                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
-                Api.SetSpectateTarget(login);
-            } else {
+                Api.SetSpectateTarget(Player.User.Login);
+            } else
                 Api.SetSpectateTarget(loginLastViewed);
-            }
+
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);
             Client.Spectator_SetForcedTarget_Clear();
         }
@@ -158,7 +190,6 @@ void Render() {
         if (UI::Button("Free " + Icons::VideoCamera))
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free);
         UI::EndDisabled();
-
 
         if ((spectating || cotd) && (camCurrent == Camera::FollowSingle || camCurrent == Camera::ReplaySingle)) {
             UI::Separator();

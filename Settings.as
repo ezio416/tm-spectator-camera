@@ -27,8 +27,11 @@ bool S_Dev = false;
 
 #endif
 
-[Setting category="General" name="Default camera"]
-Camera S_DefaultCam = Camera::FollowSingle;
+// [Setting category="General" name="Default camera"]
+// Camera S_DefaultCam = Camera::FollowSingle;
 
-[Setting category="General" name="Remember last camera used when joining server"]
-bool S_RememberLast = false;
+// [Setting category="General" name="Remember last camera used when joining server"]
+// bool S_RememberLast = false;
+
+// [Setting hidden]
+// Camera camLast = Camera::None;
