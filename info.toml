@@ -2,7 +2,7 @@
 name = "Spectator Camera"
 author = "Ezio"
 category = "Camera"
-version = "0.1.0"
+version = "0.2.0"
 siteid = 460
 
 [script]
