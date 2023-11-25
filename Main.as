@@ -168,7 +168,7 @@ void Render() {
 
         UI::Separator();
 
-        UI::BeginDisabled(camCurrent == Camera::ReplaySingle || (!spectating && !cotd));
+        UI::BeginDisabled(camCurrent == Camera::ReplaySingle || !spectating);
         if (UI::Button("Replay " + Icons::VideoCamera)) {
             if (loginLastViewed == "none") {
                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
@@ -182,7 +182,7 @@ void Render() {
         UI::EndDisabled();
 
         UI::SameLine();
-        UI::BeginDisabled(camCurrent == Camera::FollowSingle || (!spectating && !cotd));
+        UI::BeginDisabled(camCurrent == Camera::FollowSingle || !spectating);
         if (UI::Button("Follow " + Icons::Eye)) {
             if (loginLastViewed == "none") {
                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
@@ -197,7 +197,7 @@ void Render() {
         }
         UI::EndDisabled();
 
-        UI::BeginDisabled(camCurrent == Camera::FollowAll || (!spectating && !cotd));
+        UI::BeginDisabled(camCurrent == Camera::FollowAll || !spectating);
         if (UI::Button("Follow All " + Icons::Kenney::Checkbox)) {
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);
             Client.Spectator_SetForcedTarget_AllPlayers();
@@ -205,7 +205,7 @@ void Render() {
         UI::EndDisabled();
 
         UI::SameLine();
-        UI::BeginDisabled(camCurrent == Camera::Free || (!spectating && !cotd));
+        UI::BeginDisabled(camCurrent == Camera::Free || !spectating);
         if (UI::Button("Free " + Icons::VideoCamera))
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free);
         UI::EndDisabled();
