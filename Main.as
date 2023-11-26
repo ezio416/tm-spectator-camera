@@ -1,20 +1,20 @@
 /*
 c 2023-09-06
-m 2023-11-25
+m 2023-11-26
 */
 
 Camera     camCurrent      = Camera::None;
 string     colorFalse       = "\\$F00false";
 string     colorTrue        = "\\$0F0true";
 bool       cotd            = false;
-// string     gamemode        = "none";
+string     gamemode;
 // bool       inGameAlready   = false;
+bool       local           = false;
 string     loginLastViewed;
 string     loginLocal      = GetLocalLogin();
 string     loginViewing;
-// bool       notViewingSelf  = false;
-// bool       nullPlayer      = false;
 int        playerIndex;
+bool       replay          = false;
 bool       spectating      = false;
 string     title           = "\\$0D0" + Icons::VideoCamera + " \\$GSpec Cam";
 CSmPlayer@ ViewingPlayer;
@@ -112,10 +112,17 @@ void Render() {
     if (ServerInfo is null)
         return;
 
-    cotd = ServerInfo.CurGameModeStr.StartsWith("TM_Knockout");
+    gamemode = ServerInfo.CurGameModeStr;
+    cotd = gamemode.StartsWith("TM_Knockout");
+    local = gamemode.EndsWith("_Local");
+
+    if (Playground.GameTerminals.Length != 1)
+        return;
+
+    CSmPlayer@ GUIPlayer = cast<CSmPlayer@>(Playground.GameTerminals[0].GUIPlayer);
+    replay = GUIPlayer is null && local;
 
     @ViewingPlayer = VehicleState::GetViewingPlayer();
-    // nullPlayer = ;
 
     if (ViewingPlayer is null)
         loginViewing = "none";
@@ -124,10 +131,7 @@ void Render() {
         loginLastViewed = loginViewing;
     }
 
-    // notViewingSelf = loginViewing != loginLocal;
-    // watcher = IsWatcher();
-    // spectating = notViewingSelf || watcher;
-    spectating = loginViewing != loginLocal;
+    spectating = (loginViewing != loginLocal) && !replay;
 
     if (S_OnlyWhenSpec && !spectating)
         return;
@@ -160,8 +164,9 @@ void Render() {
         // UI::Text("nullPlayer: "     + (nullPlayer     ? boolTrue : boolFalse));
         // UI::Text("watcher: "        + (watcher        ? boolTrue : boolFalse));
         UI::Text("Spectating: " + (spectating ? colorTrue : colorFalse));
+        // UI::Text("replay: " + replay);
 
-        UI::BeginDisabled(cotd);
+        UI::BeginDisabled(cotd || local);
         if (UI::Button("Toggle Spectating " + (Api.IsSpectatorClient ? Icons::ToggleOn : Icons::ToggleOff)))
             Api.RequestSpectatorClient(!Api.IsSpectatorClient);
         UI::EndDisabled();
