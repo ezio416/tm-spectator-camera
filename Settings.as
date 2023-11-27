@@ -1,6 +1,6 @@
 /*
 c 2023-11-22
-m 2023-11-25
+m 2023-11-27
 */
 
 enum Camera {
@@ -26,6 +26,9 @@ bool S_OnlyWhenSpec = true;
 bool S_Dev = false;
 
 #endif
+
+[Setting category="General" name="Show number of spectators" description="does not work in COTD"]
+bool S_TotalSpec = false;
 
 // [Setting category="General" name="Default camera"]
 // Camera S_DefaultCam = Camera::FollowSingle;

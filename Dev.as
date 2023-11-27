@@ -1,6 +1,6 @@
 /*
 c 2023-11-22
-m 2023-11-23
+m 2023-11-26
 */
 
 void RenderDev() {
@@ -11,7 +11,7 @@ void RenderDev() {
 
     CSmArenaClient@ Playground = cast<CSmArenaClient@>(App.CurrentPlayground);
     if (Playground is null) {
-        loginLastViewed = "none";
+        loginLastViewed = "";
         return;
     }
 
@@ -49,14 +49,18 @@ void RenderDev() {
         return;
 
     @ViewingPlayer = VehicleState::GetViewingPlayer();
-    if (ViewingPlayer !is null) {
+
+    if (ViewingPlayer is null)
+        loginViewing = "";
+    else {
         loginViewing = ViewingPlayer.ScriptAPI.Login;
-        loginLastViewed = loginViewing;
-        spectating = (loginViewing != loginLocal);
-    } else {
-        loginViewing = "none";
-        spectating = false;
+        if (loginViewing != loginLocal)
+            loginLastViewed = loginViewing;
+        else
+            loginLastViewed = "";
     }
+
+    spectating = (loginViewing != loginLocal) && !replay;
 
     UI::Begin("SpecCamDev", S_Dev, UI::WindowFlags::AlwaysAutoResize);
         UI::Text("spec: " + Api.IsSpectator);

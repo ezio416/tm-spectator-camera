@@ -1,6 +1,6 @@
 /*
 c 2023-09-06
-m 2023-11-26
+m 2023-11-27
 */
 
 Camera     camCurrent      = Camera::None;
@@ -12,11 +12,14 @@ string     gamemode;
 bool       local           = false;
 string     loginLastViewed;
 string     loginLocal      = GetLocalLogin();
+string     loginDesired;
 string     loginViewing;
+int        pendingOffset   = 0;
 int        playerIndex;
 bool       replay          = false;
 bool       spectating      = false;
 string     title           = "\\$0D0" + Icons::VideoCamera + " \\$GSpec Cam";
+uint       totalSpectators = 0;
 CSmPlayer@ ViewingPlayer;
 bool       watcher         = false;
 
@@ -48,7 +51,7 @@ void Render() {
     CSmArenaClient@ Playground = cast<CSmArenaClient@>(App.CurrentPlayground);
     if (Playground is null) {
         // inGameAlready = false;
-        loginLastViewed = "none";
+        loginLastViewed = "";
         return;
     }
 
@@ -125,10 +128,13 @@ void Render() {
     @ViewingPlayer = VehicleState::GetViewingPlayer();
 
     if (ViewingPlayer is null)
-        loginViewing = "none";
+        loginViewing = "";
     else {
         loginViewing = ViewingPlayer.ScriptAPI.Login;
-        loginLastViewed = loginViewing;
+        if (loginViewing != loginLocal)
+            loginLastViewed = loginViewing;
+        else
+            loginLastViewed = "";
     }
 
     spectating = (loginViewing != loginLocal) && !replay;
@@ -139,23 +145,54 @@ void Render() {
     CGamePlaygroundClientScriptAPI::ESpectatorCameraType camType = Api.GetSpectatorCameraType();
     CGamePlaygroundClientScriptAPI::ESpectatorTargetType targetType = Api.GetSpectatorTargetType();
 
-    if (camType == CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free)
-        camCurrent = Camera::Free;
-    else if (camType == CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow) {
-        if (targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single)
-            camCurrent = Camera::FollowSingle;
-        else
-            camCurrent = Camera::FollowAll;
-    } else if (camType == CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay) {
-        if (targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single)
-            camCurrent = Camera::ReplaySingle;
-        else
-            camCurrent = Camera::FollowAll;
-    } else if (camType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::None)
-        camCurrent = Camera::None;
+    switch(camType) {
+        case CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free:
+            camCurrent = Camera::Free;
+            break;
+        case CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow:
+            camCurrent = targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single ? Camera::FollowSingle : Camera::FollowAll;
+            break;
+        case CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay:
+            camCurrent = targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single ? Camera::ReplaySingle : Camera::FollowAll;
+            break;
+        default:
+            camCurrent = Camera::None;
+    }
 
-    // if (camCurrent != Camera::None)
-    //     camLast = camCurrent;
+    // when switching to a player fails, try the next one
+    CGamePlayer@ Player_;
+    string login_;
+    string name_;
+    if (pendingOffset != 0) {
+        @Player_ = VehicleState::GetViewingPlayer();
+        if (Player_ !is null) {
+            if (Player_.User.Login == loginDesired)
+                pendingOffset = 0;
+            else {
+                playerIndex = GetPlayerIndex(Playground.Players.Length, playerIndex, pendingOffset);
+                @Player_ = Playground.Players[playerIndex];
+                login_ = Player_.User.Login;
+                name_ = Player_.User.Name;
+                trace("previous switch failed, switching to " + name_);
+                if (login_ == loginLocal) {
+                    playerIndex = GetPlayerIndex(Playground.Players.Length, playerIndex, pendingOffset);
+                    @Player_ = Playground.Players[playerIndex];
+                    login_ = Player_.User.Login;
+                    name_ = Player_.User.Name;
+                    trace("previous switch failed, switching to " + name_);
+                }
+                Api.SetSpectateTarget(login_);
+                loginDesired = login_;
+            }
+        }
+        return;
+    }
+
+    if (S_TotalSpec) {
+        totalSpectators = 0;
+        for (uint i = 0; i < Playground.Players.Length; i++)
+            totalSpectators += Playground.Players[i].User.NbSpectators;
+    }
 
     UI::Begin(title, S_Enabled, UI::WindowFlags::AlwaysAutoResize);
         // UI::Text("Spectating: " + (spectating ? "\\$0F0true" : (cotd ? "\\$FF0maybe" : "\\$F00false")));
@@ -165,6 +202,9 @@ void Render() {
         // UI::Text("watcher: "        + (watcher        ? boolTrue : boolFalse));
         UI::Text("Spectating: " + (spectating ? colorTrue : colorFalse));
         // UI::Text("replay: " + replay);
+        // UI::Text("lastViewed: " + loginLastViewed);
+        if (S_TotalSpec)
+            UI::Text("Spectators in game: " + totalSpectators);
 
         UI::BeginDisabled(cotd || local);
         if (UI::Button("Toggle Spectating " + (Api.IsSpectatorClient ? Icons::ToggleOn : Icons::ToggleOff)))
@@ -175,12 +215,13 @@ void Render() {
 
         UI::BeginDisabled(camCurrent == Camera::ReplaySingle || !spectating);
         if (UI::Button("Replay " + Icons::VideoCamera)) {
-            if (loginLastViewed == "none") {
+            if (loginLastViewed == "") {
                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
                 if (Player.User.Login == loginLocal)
                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
                 Api.SetSpectateTarget(Player.User.Login);
-            }
+            } else
+                Api.SetSpectateTarget(loginLastViewed);
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay);
             Client.Spectator_SetForcedTarget_Clear();
         }
@@ -189,7 +230,7 @@ void Render() {
         UI::SameLine();
         UI::BeginDisabled(camCurrent == Camera::FollowSingle || !spectating);
         if (UI::Button("Follow " + Icons::Eye)) {
-            if (loginLastViewed == "none") {
+            if (loginLastViewed == "") {
                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
                 if (Player.User.Login == loginLocal)
                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
@@ -197,6 +238,8 @@ void Render() {
             } else
                 Api.SetSpectateTarget(loginLastViewed);
 
+            // Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay);
+            // Client.Spectator_SetForcedTarget_Clear();
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);
             Client.Spectator_SetForcedTarget_Clear();
         }
@@ -219,6 +262,7 @@ void Render() {
             UI::Separator();
 
             string login;
+            string name;
 
             if (ViewingPlayer !is null)
                 UI::Text("Watching: " + ViewingPlayer.User.Name);
@@ -234,24 +278,38 @@ void Render() {
                     playerIndex = -1;
             }
 
-            // NEED TO IMPROVE THIS
-            UI::BeginDisabled(playerIndex == -1);
+            bool clicked = false;
+            int offset = 0;
+            CGamePlayer@ Player;
+
+            UI::BeginDisabled(playerIndex == -1 || pendingOffset != 0);
             if (UI::Button(Icons::ChevronLeft + " Previous")) {
-                login = Playground.Players[(uint(playerIndex) == 0 ? Playground.Players.Length : playerIndex) - 1].User.Login;
-                if (login == loginLocal) {
-                    playerIndex -= 1;
-                    login = Playground.Players[(uint(playerIndex) == 0 ? Playground.Players.Length : playerIndex) - 1].User.Login;
-                }
-                Api.SetSpectateTarget(login);
+                clicked = true;
+                offset = -1;
             }
+
             UI::SameLine();
             if (UI::Button("Next " + Icons::ChevronRight)) {
-                login = Playground.Players[(uint(playerIndex) == Playground.Players.Length - 1 ? -1 : playerIndex) + 1].User.Login;
+                clicked = true;
+                offset = 1;
+            }
+
+            if (clicked) {
+                playerIndex = GetPlayerIndex(Playground.Players.Length, playerIndex, offset);
+                @Player = Playground.Players[playerIndex];
+                login = Player.User.Login;
+                name = Player.User.Name;
+                trace("switching to " + name);
                 if (login == loginLocal) {
-                    playerIndex += 1;
-                    login = Playground.Players[(uint(playerIndex) == Playground.Players.Length - 1 ? -1 : playerIndex) + 1].User.Login;
+                    playerIndex = GetPlayerIndex(Playground.Players.Length, playerIndex, offset);
+                    @Player = Playground.Players[playerIndex];
+                    login = Player.User.Login;
+                    name = Player.User.Name;
+                    trace("previous switch failed, switching to " + name);
                 }
                 Api.SetSpectateTarget(login);
+                loginDesired = login;
+                pendingOffset = offset;
             }
             UI::EndDisabled();
         }
@@ -265,6 +323,17 @@ void CacheLocalLogin() {
         loginLocal = GetLocalLogin();
         if (loginLocal.Length > 10)
             break;
+    }
+}
+
+uint GetPlayerIndex(uint playerCount, uint currentIndex, int offset) {
+    switch (offset) {
+        case -1:
+            return (currentIndex > 0 ? currentIndex : playerCount) - 1;
+        case 1:
+            return (currentIndex < playerCount - 1 ? currentIndex + 1 : 0);
+        default:
+            return currentIndex;
     }
 }
 
