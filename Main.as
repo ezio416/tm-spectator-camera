@@ -174,6 +174,7 @@ void Render() {
                 login_ = Player_.User.Login;
                 name_ = Player_.User.Name;
                 trace("previous switch failed, switching to " + name_);
+
                 if (login_ == loginLocal) {
                     playerIndex = GetPlayerIndex(Playground.Players.Length, playerIndex, pendingOffset);
                     @Player_ = Playground.Players[playerIndex];
@@ -181,6 +182,7 @@ void Render() {
                     name_ = Player_.User.Name;
                     trace("previous switch failed, switching to " + name_);
                 }
+
                 Api.SetSpectateTarget(login_);
                 loginDesired = login_;
             }
@@ -222,6 +224,7 @@ void Render() {
                 Api.SetSpectateTarget(Player.User.Login);
             } else
                 Api.SetSpectateTarget(loginLastViewed);
+
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay);
             Client.Spectator_SetForcedTarget_Clear();
         }
@@ -300,6 +303,7 @@ void Render() {
                 login = Player.User.Login;
                 name = Player.User.Name;
                 trace("switching to " + name);
+
                 if (login == loginLocal) {
                     playerIndex = GetPlayerIndex(Playground.Players.Length, playerIndex, offset);
                     @Player = Playground.Players[playerIndex];
@@ -307,6 +311,7 @@ void Render() {
                     name = Player.User.Name;
                     trace("previous switch failed, switching to " + name);
                 }
+
                 Api.SetSpectateTarget(login);
                 loginDesired = login;
                 pendingOffset = offset;
