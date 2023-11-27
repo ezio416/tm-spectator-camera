@@ -142,18 +142,17 @@ void Render() {
     if (S_OnlyWhenSpec && !spectating)
         return;
 
-    CGamePlaygroundClientScriptAPI::ESpectatorCameraType camType = Api.GetSpectatorCameraType();
-    CGamePlaygroundClientScriptAPI::ESpectatorTargetType targetType = Api.GetSpectatorTargetType();
+    bool single = Api.GetSpectatorTargetType() == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single;
 
-    switch(camType) {
+    switch(Api.GetSpectatorCameraType()) {
         case CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free:
             camCurrent = Camera::Free;
             break;
         case CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow:
-            camCurrent = targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single ? Camera::FollowSingle : Camera::FollowAll;
+            camCurrent = single ? Camera::FollowSingle : Camera::FollowAll;
             break;
         case CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay:
-            camCurrent = targetType == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single ? Camera::ReplaySingle : Camera::FollowAll;
+            camCurrent = single ? Camera::ReplaySingle : Camera::FollowAll;
             break;
         default:
             camCurrent = Camera::None;
