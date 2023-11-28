@@ -8,7 +8,6 @@ string     colorFalse       = "\\$F00false";
 string     colorTrue        = "\\$0F0true";
 bool       cotd            = false;
 string     gamemode;
-// bool       inGameAlready   = false;
 bool       local           = false;
 string     loginLastViewed;
 string     loginLocal      = GetLocalLogin();
@@ -40,9 +39,6 @@ void Render() {
     RenderDev();
 #endif
 
-    // if (!S_Window)
-    //     return;
-
     CTrackMania@ App = cast<CTrackMania@>(GetApp());
 
     if (App.Editor !is null)
@@ -50,7 +46,6 @@ void Render() {
 
     CSmArenaClient@ Playground = cast<CSmArenaClient@>(App.CurrentPlayground);
     if (Playground is null) {
-        // inGameAlready = false;
         loginLastViewed = "";
         return;
     }
@@ -82,38 +77,6 @@ void Render() {
     CGamePlaygroundUIConfig@ Client = cast<CGamePlaygroundUIConfig@>(ManiaApp.ClientUI);
     if (Client is null)
         return;
-
-    // if (!inGameAlready) {
-    //     switch (S_RememberLast ? camLast : S_DefaultCam) {
-    //         case Camera::FollowAll:
-    //             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);
-    //             Client.Spectator_SetForcedTarget_AllPlayers();
-    //             break;
-    //         case Camera::FollowSingle:
-    //             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);
-    //             if (loginLastViewed == "none") {
-    //                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
-    //                 if (Player.User.Login == loginLocal)
-    //                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
-    //                 Api.SetSpectateTarget(Player.User.Login);
-    //             }
-    //             Client.Spectator_SetForcedTarget_Clear();
-    //             break;
-    //         case Camera::ReplaySingle:
-    //             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay);
-    //             if (loginLastViewed == "none") {
-    //                 CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
-    //                 if (Player.User.Login == loginLocal)
-    //                     @Player = cast<CGamePlayer@>(Playground.Players[1]);
-    //                 Api.SetSpectateTarget(Player.User.Login);
-    //             }
-    //             Client.Spectator_SetForcedTarget_Clear();
-    //             break;
-    //         case Camera::Free:
-    //             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free);
-    //     }
-    //     inGameAlready = true;
-    // }
 
     CTrackManiaNetworkServerInfo@ ServerInfo = cast<CTrackManiaNetworkServerInfo@>(Network.ServerInfo);
     if (ServerInfo is null)
@@ -204,14 +167,7 @@ void Render() {
     }
 
     UI::Begin(title, S_Enabled, UI::WindowFlags::AlwaysAutoResize);
-        // UI::Text("Spectating: " + (spectating ? "\\$0F0true" : (cotd ? "\\$FF0maybe" : "\\$F00false")));
-        // UI::Text("Current Camera: " + tostring(camCurrent));
-        // UI::Text("notViewingSelf: " + (notViewingSelf ? boolTrue : boolFalse));
-        // UI::Text("nullPlayer: "     + (nullPlayer     ? boolTrue : boolFalse));
-        // UI::Text("watcher: "        + (watcher        ? boolTrue : boolFalse));
         UI::Text("Spectating: " + (spectating ? colorTrue : colorFalse));
-        // UI::Text("replay: " + replay);
-        // UI::Text("lastViewed: " + loginLastViewed);
         if (S_TotalSpec && !cotd)
             UI::Text("Spectators in game: " + totalSpectators);
 
@@ -347,59 +303,3 @@ uint GetPlayerIndex(uint playerCount, uint currentIndex, int offset) {
             return currentIndex;
     }
 }
-
-// bool IsWatcher() {
-//     CTrackMania@ App = cast<CTrackMania@>(GetApp());
-
-//     CTrackManiaNetwork@ Network = cast<CTrackManiaNetwork@>(App.Network);
-//     if (Network is null)
-//         return false;
-
-//     CTrackManiaPlayerInfo@ PlayerInfo = cast<CTrackManiaPlayerInfo@>(Network.PlayerInfo);
-//     if (PlayerInfo is null)
-//         return false;
-
-//     return tostring(PlayerInfo.SpectatorMode) == "Watcher";
-// }
-
-// bool SpectatorUILayerVisible() {
-//     CGameUILayer@ SpecLayer;
-//     bool found = false;
-
-//     CTrackMania@ App = cast<CTrackMania@>(GetApp());
-
-//     CSmArenaClient@ Playground = cast<CSmArenaClient@>(App.CurrentPlayground);
-//     if (Playground is null)
-//         return false;
-
-//     CTrackManiaNetwork@ Network = cast<CTrackManiaNetwork@>(App.Network);
-//     if (Network is null)
-//         return false;
-
-//     CGameManiaAppPlayground@ ManiaApp = cast<CGameManiaAppPlayground@>(Network.ClientManiaAppPlayground);
-//     if (ManiaApp is null)
-//         return false;
-
-//     MwFastBuffer<CGameUILayer@> UILayers = ManiaApp.UILayers;
-
-//     for (uint i = 0; i < UILayers.Length; i++) {
-//         string manialink = UILayers[i].ManialinkPage;
-//         string[]@ firstLines = manialink.Split("\n", 5);
-
-//         if (firstLines.Length > 0) {
-//             for (uint j = 0; j < firstLines.Length - 1; j++) {
-//                 if (firstLines[j].Contains("UIModule_Race_SpectatorBase")) {
-//                     // print("found layer");
-//                     @SpecLayer = UILayers[i];
-//                     found = true;
-//                     break;
-//                 }
-//             }
-//         }
-
-//         if (found)
-//             break;
-//     }
-
-//     return SpecLayer.IsVisible;
-// }

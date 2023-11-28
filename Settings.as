@@ -14,9 +14,6 @@ enum Camera {
 [Setting category="General" name="Enabled"]
 bool S_Enabled = true;
 
-// [Setting category="General" name="Show window"]
-// bool S_Window = true;
-
 [Setting category="General" name="Only show when spectating"]
 bool S_OnlyWhenSpec = true;
 
