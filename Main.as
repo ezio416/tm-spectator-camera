@@ -55,6 +55,10 @@ void Render() {
         return;
     }
 
+    CGamePlaygroundUIConfig::EUISequence Sequence = Playground.UIConfigs[0].UISequence;
+    if (Sequence != CGamePlaygroundUIConfig::EUISequence::Playing)
+        return;
+
     CGamePlaygroundInterface@ Interface = cast<CGamePlaygroundInterface@>(Playground.Interface);
     if (Interface is null)
         return;
@@ -159,6 +163,7 @@ void Render() {
     }
 
     // when switching to a player fails, try the next one
+    //https://github.com/ezio416/tm-spectator-camera/issues/2
     CGamePlayer@ Player_;
     string login_;
     string name_;
@@ -185,10 +190,13 @@ void Render() {
                 Api.SetSpectateTarget(login_);
                 loginDesired = login_;
             }
-        }
+        } else
+            pendingOffset = 0;
+
         return;
     }
 
+    // https://github.com/ezio416/tm-spectator-camera/issues/5
     if (S_TotalSpec) {
         totalSpectators = 0;
         for (uint i = 0; i < Playground.Players.Length; i++)
@@ -204,7 +212,7 @@ void Render() {
         UI::Text("Spectating: " + (spectating ? colorTrue : colorFalse));
         // UI::Text("replay: " + replay);
         // UI::Text("lastViewed: " + loginLastViewed);
-        if (S_TotalSpec)
+        if (S_TotalSpec && !cotd)
             UI::Text("Spectators in game: " + totalSpectators);
 
         UI::BeginDisabled(cotd || local);
@@ -240,8 +248,7 @@ void Render() {
             } else
                 Api.SetSpectateTarget(loginLastViewed);
 
-            // Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Replay);
-            // Client.Spectator_SetForcedTarget_Clear();
+            // https://github.com/ezio416/tm-spectator-camera/issues/3
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);
             Client.Spectator_SetForcedTarget_Clear();
         }
