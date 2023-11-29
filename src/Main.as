@@ -1,6 +1,6 @@
 /*
 c 2023-09-06
-m 2023-11-27
+m 2023-11-29
 */
 
 Camera     camCurrent      = Camera::None;
@@ -167,7 +167,8 @@ void Render() {
     }
 
     UI::Begin(title, S_Enabled, UI::WindowFlags::AlwaysAutoResize);
-        UI::Text("Spectating: " + (spectating ? colorTrue : colorFalse));
+        if (!S_OnlyWhenSpec)
+            UI::Text("Spectating: " + (spectating ? colorTrue : colorFalse));
         if (S_TotalSpec && !cotd)
             UI::Text("Spectators in game: " + totalSpectators);
 
