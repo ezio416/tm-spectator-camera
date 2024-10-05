@@ -1,5 +1,7 @@
 // c 2023-11-22
-// m 2023-11-26
+// m 2024-10-05
+
+#if SIG_DEVELOPER
 
 void RenderDev() {
     if (!S_Dev)
@@ -107,3 +109,5 @@ void RenderDev() {
         }
     UI::End();
 }
+
+#endif
