@@ -1,13 +1,5 @@
 // c 2023-11-22
-// m 2023-11-27
-
-enum Camera {
-    FollowAll,
-    FollowSingle,
-    ReplaySingle,
-    Free,
-    None
-}
+// m 2024-04-02
 
 [Setting category="General" name="Enabled"]
 bool S_Enabled = true;
