@@ -149,8 +149,12 @@ void Render() {
         if (UI::Button("Replay " + Icons::VideoCamera)) {
             if (loginLastViewed == "") {
                 CGamePlayer@ Player = Playground.Players[0];
-                if (Player.User.Login == loginLocal)
+                if (true
+                    and Player.User.Login == loginLocal
+                    and Playground.Players.Length > 1
+                ) {
                     @Player = Playground.Players[1];
+                }
                 Api.SetSpectateTarget(Player.User.Login);
             } else
                 Api.SetSpectateTarget(loginLastViewed);
@@ -165,8 +169,12 @@ void Render() {
         if (UI::Button("Follow " + Icons::Eye)) {
             if (loginLastViewed == "") {
                 CGamePlayer@ Player = Playground.Players[0];
-                if (Player.User.Login == loginLocal)
+                if (true
+                    and Player.User.Login == loginLocal
+                    and Playground.Players.Length > 1
+                ) {
                     @Player = Playground.Players[1];
+                }
                 Api.SetSpectateTarget(Player.User.Login);
             } else
                 Api.SetSpectateTarget(loginLastViewed);
