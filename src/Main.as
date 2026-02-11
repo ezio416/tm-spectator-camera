@@ -1,6 +1,3 @@
-// c 2023-09-06
-// m 2023-11-29
-
 Camera     camCurrent      = Camera::None;
 string     colorFalse       = "\\$F00false";
 string     colorTrue        = "\\$0F0true";

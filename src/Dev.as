@@ -1,6 +1,3 @@
-// c 2023-11-22
-// m 2024-10-05
-
 #if SIG_DEVELOPER
 
 void RenderDev() {

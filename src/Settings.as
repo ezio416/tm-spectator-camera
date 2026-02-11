@@ -1,6 +1,3 @@
-// c 2023-11-22
-// m 2023-11-27
-
 enum Camera {
     FollowAll,
     FollowSingle,
