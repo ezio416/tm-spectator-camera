@@ -5,47 +5,30 @@ void RenderDev() {
         return;
 
     auto App = cast<CTrackMania>(GetApp());
-
     auto Playground = cast<CSmArenaClient>(App.CurrentPlayground);
-    if (Playground is null) {
+    auto Network = cast<CTrackManiaNetwork>(App.Network);
+
+    if (false
+        or App.Editor !is null
+        or Playground is null
+        or Playground.UIConfigs.Length == 0
+        or Playground.UIConfigs[0].UISequence != CGamePlaygroundUIConfig::EUISequence::Playing
+        or Playground.Interface is null
+        or Playground.Interface.ManialinkScriptHandler is null
+        or Playground.Interface.ManialinkScriptHandler.Playground is null
+        or Network.ClientManiaAppPlayground is null
+        or Network.ClientManiaAppPlayground.ClientUI is null
+        or Playground.GameTerminals.Length != 1
+    ) {
         loginLastViewed = "";
         return;
     }
 
-    // auto Arena = cast<CSmArena>(Playground.Arena);
-    // if (Arena is null)
-    //     return;
+    CGamePlaygroundClientScriptAPI@ Api = Playground.Interface.ManialinkScriptHandler.Playground;
+    CGameManiaAppPlayground@ CMAP = Network.ClientManiaAppPlayground;
+    CGamePlaygroundUIConfig@ Client = CMAP.ClientUI;
 
-    // if (Arena.Players.Length == 0)
-    //     return;
-
-    // auto Script = cast<CSmScriptPlayer>(Arena.Players[0].ScriptAPI);
-
-    CGamePlaygroundInterface@ Interface = Playground.Interface;
-    if (Interface is null)
-        return;
-
-    CGameScriptHandlerPlaygroundInterface@ Handler = Interface.ManialinkScriptHandler;
-    if (Handler is null)
-        return;
-
-    CGamePlaygroundClientScriptAPI@ Api = Handler.Playground;
-    if (Api is null)
-        return;
-
-    CTrackManiaNetwork@ Network = cast<CTrackManiaNetwork>(App.Network);
-    if (Network is null)
-        return;
-
-    CGameManiaAppPlayground@ ManiaApp = Network.ClientManiaAppPlayground;
-    if (ManiaApp is null)
-        return;
-
-    CGamePlaygroundUIConfig@ Client = ManiaApp.ClientUI;
-    if (Client is null)
-        return;
-
-    @ViewingPlayer = VehicleState::GetViewingPlayer();
+    CSmPlayer@ ViewingPlayer = VehicleState::GetViewingPlayer();
 
     if (ViewingPlayer is null)
         loginViewing = "";

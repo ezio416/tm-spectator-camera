@@ -1,20 +1,16 @@
-Camera     camCurrent      = Camera::None;
-string     colorFalse       = "\\$F00false";
-string     colorTrue        = "\\$0F0true";
-bool       cotd            = false;
-string     gamemode;
-bool       local           = false;
-string     loginLastViewed;
-string     loginLocal      = GetLocalLogin();
-string     loginDesired;
-string     loginViewing;
-int        pendingOffset   = 0;
-int        playerIndex;
-bool       replay          = false;
-bool       spectating      = false;
-string     title           = "\\$0D0" + Icons::VideoCamera + " \\$GSpec Cam";
-uint       totalSpectators = 0;
-CSmPlayer@ ViewingPlayer;
+Camera camCurrent      = Camera::None;
+string colorFalse      = "\\$F00false";
+string colorTrue       = "\\$0F0true";
+string loginLastViewed;
+string loginLocal      = GetLocalLogin();
+string loginDesired;
+string loginViewing;
+int    pendingOffset   = 0;
+int    playerIndex;
+bool   replay          = false;
+bool   spectating      = false;
+string title           = "\\$0D0" + Icons::VideoCamera + " \\$GSpec Cam";
+uint   totalSpectators = 0;
 
 void Main() {
     startnew(CacheLocalLogin);
@@ -34,59 +30,37 @@ void Render() {
 #endif
 
     auto App = cast<CTrackMania>(GetApp());
-
-    if (App.Editor !is null)
-        return;
-
     auto Playground = cast<CSmArenaClient>(App.CurrentPlayground);
-    if (Playground is null) {
+    auto Network = cast<CTrackManiaNetwork>(App.Network);
+    auto ServerInfo = cast<CTrackManiaNetworkServerInfo>(Network.ServerInfo);
+
+    if (false
+        or App.Editor !is null
+        or Playground is null
+        or Playground.UIConfigs.Length == 0
+        or Playground.UIConfigs[0].UISequence != CGamePlaygroundUIConfig::EUISequence::Playing
+        or Playground.Interface is null
+        or Playground.Interface.ManialinkScriptHandler is null
+        or Playground.Interface.ManialinkScriptHandler.Playground is null
+        or Network.ClientManiaAppPlayground is null
+        or Network.ClientManiaAppPlayground.ClientUI is null
+        or Playground.GameTerminals.Length != 1
+    ) {
         loginLastViewed = "";
         return;
     }
 
-    CGamePlaygroundUIConfig::EUISequence Sequence = Playground.UIConfigs[0].UISequence;
-    if (Sequence != CGamePlaygroundUIConfig::EUISequence::Playing)
-        return;
+    CGamePlaygroundClientScriptAPI@ Api = Playground.Interface.ManialinkScriptHandler.Playground;
+    CGameManiaAppPlayground@ CMAP = Network.ClientManiaAppPlayground;
+    CGamePlaygroundUIConfig@ Client = CMAP.ClientUI;
 
-    CGamePlaygroundInterface@ Interface = Playground.Interface;
-    if (Interface is null)
-        return;
-
-    CGameScriptHandlerPlaygroundInterface@ Handler = Interface.ManialinkScriptHandler;
-    if (Handler is null)
-        return;
-
-    CGamePlaygroundClientScriptAPI@ Api = Handler.Playground;
-    if (Api is null)
-        return;
-
-    auto Network = cast<CTrackManiaNetwork>(App.Network);
-    if (Network is null)
-        return;
-
-    CGameManiaAppPlayground@ ManiaApp = Network.ClientManiaAppPlayground;
-    if (ManiaApp is null)
-        return;
-
-    CGamePlaygroundUIConfig@ Client = ManiaApp.ClientUI;
-    if (Client is null)
-        return;
-
-    auto ServerInfo = cast<CTrackManiaNetworkServerInfo>(Network.ServerInfo);
-    if (ServerInfo is null)
-        return;
-
-    gamemode = ServerInfo.CurGameModeStr;
-    cotd = gamemode.StartsWith("TM_Knockout");
-    local = gamemode.EndsWith("_Local");
-
-    if (Playground.GameTerminals.Length != 1)
-        return;
+    const bool cotd = ServerInfo.CurGameModeStr.StartsWith("TM_Knockout");
+    const bool local = ServerInfo.CurGameModeStr.EndsWith("_Local");
 
     auto GUIPlayer = cast<CSmPlayer>(Playground.GameTerminals[0].GUIPlayer);
     replay = GUIPlayer is null && local;
 
-    @ViewingPlayer = VehicleState::GetViewingPlayer();
+    CSmPlayer@ ViewingPlayer = VehicleState::GetViewingPlayer();
 
     if (ViewingPlayer is null)
         loginViewing = "";
@@ -103,9 +77,9 @@ void Render() {
     if (S_OnlyWhenSpec && !spectating)
         return;
 
-    bool single = Api.GetSpectatorTargetType() == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single;
+    const bool single = Api.GetSpectatorTargetType() == CGamePlaygroundClientScriptAPI::ESpectatorTargetType::Single;
 
-    switch(Api.GetSpectatorCameraType()) {
+    switch (Api.GetSpectatorCameraType()) {
         case CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free:
             camCurrent = Camera::Free;
             break;
