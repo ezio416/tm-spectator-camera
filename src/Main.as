@@ -1,6 +1,4 @@
 Camera camCurrent      = Camera::None;
-string colorFalse      = "\\$F00false";
-string colorTrue       = "\\$0F0true";
 string loginLastViewed;
 string loginLocal      = GetLocalLogin();
 string loginDesired;
@@ -136,7 +134,7 @@ void Render() {
 
     UI::Begin(title, S_Enabled, UI::WindowFlags::AlwaysAutoResize);
         if (!S_OnlyWhenSpec)
-            UI::Text("Spectating: " + (spectating ? colorTrue : colorFalse));
+            UI::Text("Spectating: " + (spectating ? "\\$0F0true" : "\\$F00false"));
         if (S_TotalSpec && !cotd)
             UI::Text("Spectators in game: " + totalSpectators);
 
