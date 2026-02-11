@@ -55,7 +55,7 @@ void Render() {
     CGamePlaygroundUIConfig@ Client = CMAP.ClientUI;
 
     const bool cotd = ServerInfo.CurGameModeStr.StartsWith("TM_Knockout");
-    const bool local = ServerInfo.CurGameModeStr.EndsWith("_Local");
+    const bool local = App.PlaygroundScript !is null;
 
     auto GUIPlayer = cast<CSmPlayer>(Playground.GameTerminals[0].GUIPlayer);
     replay = GUIPlayer is null && local;
