@@ -4,44 +4,44 @@ void RenderDev() {
     if (!S_Dev)
         return;
 
-    CTrackMania@ App = cast<CTrackMania@>(GetApp());
+    auto App = cast<CTrackMania>(GetApp());
 
-    CSmArenaClient@ Playground = cast<CSmArenaClient@>(App.CurrentPlayground);
+    auto Playground = cast<CSmArenaClient>(App.CurrentPlayground);
     if (Playground is null) {
         loginLastViewed = "";
         return;
     }
 
-    // CSmArena@ Arena = cast<CSmArena@>(Playground.Arena);
+    // auto Arena = cast<CSmArena>(Playground.Arena);
     // if (Arena is null)
     //     return;
 
     // if (Arena.Players.Length == 0)
     //     return;
 
-    // CSmScriptPlayer@ Script = cast<CSmScriptPlayer@>(Arena.Players[0].ScriptAPI);
+    // auto Script = cast<CSmScriptPlayer>(Arena.Players[0].ScriptAPI);
 
-    CGamePlaygroundInterface@ Interface = cast<CGamePlaygroundInterface@>(Playground.Interface);
+    CGamePlaygroundInterface@ Interface = Playground.Interface;
     if (Interface is null)
         return;
 
-    CGameScriptHandlerPlaygroundInterface@ Handler = cast<CGameScriptHandlerPlaygroundInterface@>(Interface.ManialinkScriptHandler);
+    CGameScriptHandlerPlaygroundInterface@ Handler = Interface.ManialinkScriptHandler;
     if (Handler is null)
         return;
 
-    CGamePlaygroundClientScriptAPI@ Api = cast<CGamePlaygroundClientScriptAPI@>(Handler.Playground);
+    CGamePlaygroundClientScriptAPI@ Api = Handler.Playground;
     if (Api is null)
         return;
 
-    CTrackManiaNetwork@ Network = cast<CTrackManiaNetwork@>(App.Network);
+    CTrackManiaNetwork@ Network = cast<CTrackManiaNetwork>(App.Network);
     if (Network is null)
         return;
 
-    CGameManiaAppPlayground@ ManiaApp = cast<CGameManiaAppPlayground@>(Network.ClientManiaAppPlayground);
+    CGameManiaAppPlayground@ ManiaApp = Network.ClientManiaAppPlayground;
     if (ManiaApp is null)
         return;
 
-    CGamePlaygroundUIConfig@ Client = cast<CGamePlaygroundUIConfig@>(ManiaApp.ClientUI);
+    CGamePlaygroundUIConfig@ Client = ManiaApp.ClientUI;
     if (Client is null)
         return;
 
@@ -98,7 +98,7 @@ void RenderDev() {
         }
 
         for (uint i = 0; i < Playground.Players.Length; i++) {
-            CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[i]);
+            CGamePlayer@ Player = Playground.Players[i];
             if (UI::Selectable(Player.User.Name + " " + Player.User.Login, false)) {
                 Api.SetSpectateTarget(Player.User.Login);
                 Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);

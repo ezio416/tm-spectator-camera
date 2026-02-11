@@ -34,12 +34,12 @@ void Render() {
     RenderDev();
 #endif
 
-    CTrackMania@ App = cast<CTrackMania@>(GetApp());
+    auto App = cast<CTrackMania>(GetApp());
 
     if (App.Editor !is null)
         return;
 
-    CSmArenaClient@ Playground = cast<CSmArenaClient@>(App.CurrentPlayground);
+    auto Playground = cast<CSmArenaClient>(App.CurrentPlayground);
     if (Playground is null) {
         loginLastViewed = "";
         return;
@@ -49,31 +49,31 @@ void Render() {
     if (Sequence != CGamePlaygroundUIConfig::EUISequence::Playing)
         return;
 
-    CGamePlaygroundInterface@ Interface = cast<CGamePlaygroundInterface@>(Playground.Interface);
+    CGamePlaygroundInterface@ Interface = Playground.Interface;
     if (Interface is null)
         return;
 
-    CGameScriptHandlerPlaygroundInterface@ Handler = cast<CGameScriptHandlerPlaygroundInterface@>(Interface.ManialinkScriptHandler);
+    CGameScriptHandlerPlaygroundInterface@ Handler = Interface.ManialinkScriptHandler;
     if (Handler is null)
         return;
 
-    CGamePlaygroundClientScriptAPI@ Api = cast<CGamePlaygroundClientScriptAPI@>(Handler.Playground);
+    CGamePlaygroundClientScriptAPI@ Api = Handler.Playground;
     if (Api is null)
         return;
 
-    CTrackManiaNetwork@ Network = cast<CTrackManiaNetwork@>(App.Network);
+    auto Network = cast<CTrackManiaNetwork>(App.Network);
     if (Network is null)
         return;
 
-    CGameManiaAppPlayground@ ManiaApp = cast<CGameManiaAppPlayground@>(Network.ClientManiaAppPlayground);
+    CGameManiaAppPlayground@ ManiaApp = Network.ClientManiaAppPlayground;
     if (ManiaApp is null)
         return;
 
-    CGamePlaygroundUIConfig@ Client = cast<CGamePlaygroundUIConfig@>(ManiaApp.ClientUI);
+    CGamePlaygroundUIConfig@ Client = ManiaApp.ClientUI;
     if (Client is null)
         return;
 
-    CTrackManiaNetworkServerInfo@ ServerInfo = cast<CTrackManiaNetworkServerInfo@>(Network.ServerInfo);
+    auto ServerInfo = cast<CTrackManiaNetworkServerInfo>(Network.ServerInfo);
     if (ServerInfo is null)
         return;
 
@@ -84,7 +84,7 @@ void Render() {
     if (Playground.GameTerminals.Length != 1)
         return;
 
-    CSmPlayer@ GUIPlayer = cast<CSmPlayer@>(Playground.GameTerminals[0].GUIPlayer);
+    auto GUIPlayer = cast<CSmPlayer>(Playground.GameTerminals[0].GUIPlayer);
     replay = GUIPlayer is null && local;
 
     @ViewingPlayer = VehicleState::GetViewingPlayer();
@@ -177,9 +177,9 @@ void Render() {
         UI::BeginDisabled(camCurrent == Camera::ReplaySingle || !spectating);
         if (UI::Button("Replay " + Icons::VideoCamera)) {
             if (loginLastViewed == "") {
-                CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
+                CGamePlayer@ Player = Playground.Players[0];
                 if (Player.User.Login == loginLocal)
-                    @Player = cast<CGamePlayer@>(Playground.Players[1]);
+                    @Player = Playground.Players[1];
                 Api.SetSpectateTarget(Player.User.Login);
             } else
                 Api.SetSpectateTarget(loginLastViewed);
@@ -193,9 +193,9 @@ void Render() {
         UI::BeginDisabled(camCurrent == Camera::FollowSingle || !spectating);
         if (UI::Button("Follow " + Icons::Eye)) {
             if (loginLastViewed == "") {
-                CGamePlayer@ Player = cast<CGamePlayer@>(Playground.Players[0]);
+                CGamePlayer@ Player = Playground.Players[0];
                 if (Player.User.Login == loginLocal)
-                    @Player = cast<CGamePlayer@>(Playground.Players[1]);
+                    @Player = Playground.Players[1];
                 Api.SetSpectateTarget(Player.User.Login);
             } else
                 Api.SetSpectateTarget(loginLastViewed);
