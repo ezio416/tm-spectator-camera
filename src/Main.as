@@ -15,7 +15,6 @@ bool       spectating      = false;
 string     title           = "\\$0D0" + Icons::VideoCamera + " \\$GSpec Cam";
 uint       totalSpectators = 0;
 CSmPlayer@ ViewingPlayer;
-bool       watcher         = false;
 
 void Main() {
     startnew(CacheLocalLogin);
