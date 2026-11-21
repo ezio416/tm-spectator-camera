@@ -5,6 +5,7 @@ string loginDesired;
 string loginViewing;
 int    pendingOffset   = 0;
 int    playerIndex;
+Hotkey queuedAction    = Hotkey::None;
 bool   replay          = false;
 bool   spectating      = false;
 string title           = "\\$0D0" + Icons::VideoCamera + " \\$GSpec Cam";
@@ -14,13 +15,46 @@ void Main() {
     startnew(CacheLocalLogin);
 }
 
+void OnKeyPress(bool down, VirtualKey key) {
+    if (!down) {
+        return;
+    }
+
+    if (key == S_HotkeyReplay) {
+        trace("pressed " + tostring(key) + " (replay camera)");
+        queuedAction = Hotkey::Replay;
+
+    } else if (key == S_HotkeyFollow) {
+        trace("pressed " + tostring(key) + " (follow camera)");
+        queuedAction = Hotkey::Follow;
+
+    } else if (key == S_HotkeyFollowAll) {
+        trace("pressed " + tostring(key) + " (follow all camera)");
+        queuedAction = Hotkey::FollowAll;
+
+    } else if (key == S_HotkeyFree) {
+        trace("pressed " + tostring(key) + " (free camera)");
+        queuedAction = Hotkey::Free;
+    }
+}
+
 void RenderMenu() {
     if (UI::MenuItem(title, "", S_Enabled))
         S_Enabled = !S_Enabled;
 }
 
 void Render() {
-    if (!S_Enabled)
+    try {
+        RenderInner();
+        queuedAction = Hotkey::None;
+    } catch {
+        queuedAction = Hotkey::None;
+        throw(getExceptionInfo());
+    }
+}
+
+void RenderInner() {
+    if (!S_Enabled and !S_HiddenHotkeys)
         return;
 
 #if SIG_DEVELOPER
@@ -132,7 +166,16 @@ void Render() {
             totalSpectators += Playground.Players[i].User.NbSpectators;
     }
 
-    UI::Begin(title, S_Enabled, UI::WindowFlags::AlwaysAutoResize);
+    if (S_Enabled) {
+        UI::Begin(title, S_Enabled, UI::WindowFlags::AlwaysAutoResize);
+    } else if (S_HiddenHotkeys) {  // yes this is super weird, will change later
+        UI::SetNextWindowPos(-100, -100, UI::Cond::Always);
+        UI::SetNextWindowSize(1, 1, UI::Cond::Always);
+        UI::Begin(title + "##hidden");
+    } else {
+        return;
+    }
+
         if (!S_OnlyWhenSpec)
             UI::Text("Spectating: " + (spectating ? "\\$0F0true" : "\\$F00false"));
         if (S_TotalSpec && !cotd)
@@ -146,7 +189,7 @@ void Render() {
         UI::Separator();
 
         UI::BeginDisabled(camCurrent == Camera::ReplaySingle || !spectating);
-        if (UI::Button("Replay " + Icons::VideoCamera)) {
+        if (UI::Button("Replay " + HotkeyHint(S_HotkeyReplay) + Icons::VideoCamera) or queuedAction == Hotkey::Replay) {
             if (loginLastViewed == "") {
                 CGamePlayer@ Player = Playground.Players[0];
                 if (true
@@ -166,7 +209,7 @@ void Render() {
 
         UI::SameLine();
         UI::BeginDisabled(camCurrent == Camera::FollowSingle || !spectating);
-        if (UI::Button("Follow " + Icons::Eye)) {
+        if (UI::Button("Follow " + HotkeyHint(S_HotkeyFollow) + Icons::Eye) or queuedAction == Hotkey::Follow) {
             if (loginLastViewed == "") {
                 CGamePlayer@ Player = Playground.Players[0];
                 if (true
@@ -186,7 +229,7 @@ void Render() {
         UI::EndDisabled();
 
         UI::BeginDisabled(camCurrent == Camera::FollowAll || !spectating);
-        if (UI::Button("Follow All " + Icons::Kenney::Checkbox)) {
+        if (UI::Button("Follow All " + HotkeyHint(S_HotkeyFollowAll) + Icons::Kenney::Checkbox) or queuedAction == Hotkey::FollowAll) {
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Follow);
             Client.Spectator_SetForcedTarget_AllPlayers();
         }
@@ -194,7 +237,7 @@ void Render() {
 
         UI::SameLine();
         UI::BeginDisabled(camCurrent == Camera::Free || !spectating);
-        if (UI::Button("Free " + Icons::VideoCamera))
+        if (UI::Button("Free " + HotkeyHint(S_HotkeyFree) + Icons::VideoCamera) or queuedAction == Hotkey::Free)
             Api.SetWantedSpectatorCameraType(CGamePlaygroundClientScriptAPI::ESpectatorCameraType::Free);
         UI::EndDisabled();
 
@@ -277,4 +320,11 @@ uint GetPlayerIndex(uint playerCount, uint currentIndex, int offset) {
         default:
             return currentIndex;
     }
+}
+
+string HotkeyHint(const VirtualKey key) {
+    return key != VirtualKey::None
+        ? "(" + tostring(key) + ") "
+        : " "
+    ;
 }

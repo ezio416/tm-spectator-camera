@@ -6,7 +6,7 @@ enum Camera {
     None
 }
 
-[Setting category="General" name="Enabled"]
+[Setting category="General" name="Show window"]
 bool S_Enabled = true;
 
 [Setting category="General" name="Only show when spectating"]
@@ -30,3 +30,28 @@ bool S_TotalSpec = false;
 
 // [Setting hidden]
 // Camera camLast = Camera::None;
+
+
+enum Hotkey {
+    None = -1,
+    Replay,
+    Follow,
+    FollowAll,
+    Free,
+}
+
+
+[Setting category="Hotkeys" name="Allow when window is hidden"]
+bool S_HiddenHotkeys = false;
+
+[Setting category="Hotkeys" name="Replay camera"]
+VirtualKey S_HotkeyReplay = VirtualKey::None;
+
+[Setting category="Hotkeys" name="Follow camera"]
+VirtualKey S_HotkeyFollow = VirtualKey::None;
+
+[Setting category="Hotkeys" name="Follow All camera"]
+VirtualKey S_HotkeyFollowAll = VirtualKey::None;
+
+[Setting category="Hotkeys" name="Free camera"]
+VirtualKey S_HotkeyFree = VirtualKey::None;
